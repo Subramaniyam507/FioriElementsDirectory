@@ -49,12 +49,36 @@ modules:
           sap.cloud.service: fioriel
         - Authentication: OAuth2UserTokenExchange
           Name: fioriel_uaa_FioriElementsDirectory
-          ServiceInstanceName:  uaa_FioriElementsDirectory
+          ServiceInstanceName: uaa_FioriElementsDirectory
           ServiceKeyName: uaa_FioriElementsDirectory-key
           sap.cloud.service: fioriel
         existing_destinations_policy: ignore
   build-parameters:
     no-source: true
+- name: FioriElementsDirectory-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: FioriElementsDirectory_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - comsubbulistreportobjectpage.zip
+      name: comsubbulistreportobjectpage
+      target-path: resources/
+- name: comsubbulistreportobjectpage
+  type: html5
+  path: app/listreport-objectpage
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
 resources:
 - name: FioriElementsDirectory-db
   type: com.sap.xs.hdi-container
@@ -64,6 +88,17 @@ resources:
 - name: FioriElementsDirectory-destination
   type: org.cloudfoundry.managed-service
   parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
     service: destination
     service-plan: lite
 - name: FioriElementsDirectory_html_repo_host
@@ -79,6 +114,7 @@ resources:
     service: xsuaa
     service-plan: application
 parameters:
+  deploy_mode: html5-repo
   enable-parallel-deployments: true
 build-parameters:
   before-all:
