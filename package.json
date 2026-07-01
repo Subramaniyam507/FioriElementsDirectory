@@ -15,7 +15,11 @@
     "@cap-js/cds-typer": ">=0.1"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "typecheck": "tsc --noEmit -p tsconfig.cdsbuild.json",
+    "build:service": "tsc -p tsconfig.cdsbuild.json",
+    "build": "npm run typecheck && npx cds build --production && npm run build:service"
+
   },
   "private": true,
   "cds": {
